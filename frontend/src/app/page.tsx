@@ -22,34 +22,34 @@ export default function LandingPage() {
   const { data: session } = useSession();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="container mx-auto px-4 py-6 sticky top-0 backdrop-blur-sm bg-white/70 z-50 rounded-b-2xl shadow-sm">
+      <header className="container mx-auto px-4 py-4 sm:py-6 sticky top-0 backdrop-blur-md bg-card/80 z-50 border-b border-border shadow-sm">
         <nav className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 sm:space-x-3">
             <div className="relative">
-              <Heart className="h-8 w-8 text-red-500 animate-pulse" />
-              <Sparkles className="h-4 w-4 text-yellow-500 absolute -top-1 -right-1" />
+              <Heart className="h-6 w-6 sm:h-8 sm:w-8 text-destructive animate-pulse" />
+              <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 text-primary absolute -top-1 -right-1" />
             </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            <span className="text-xl sm:text-2xl font-bold text-primary">
               HealthCare AI
             </span>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             {session?.user ? (
               <>
                 <Link href="/dashboard">
-                  <Button variant="ghost">Dashboard</Button>
+                  <Button variant="ghost" size="sm" className="text-xs sm:text-sm">Dashboard</Button>
                 </Link>
                 <UserButton />
               </>
             ) : (
               <>
                 <Link href="/signin">
-                  <Button variant="ghost">Sign In</Button>
+                  <Button variant="ghost" size="sm" className="text-xs sm:text-sm">Sign In</Button>
                 </Link>
                 <Link href="/signup">
-                  <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+                  <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg text-xs sm:text-sm">
                     Get Started
                   </Button>
                 </Link>
@@ -60,23 +60,23 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20 text-center">
+      <section className="container mx-auto px-4 py-12 sm:py-16 md:py-24 text-center">
         <div className="max-w-4xl mx-auto">
-          <Badge className="mb-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-0">
+          <Badge className="mb-4 sm:mb-6 bg-primary text-primary-foreground border-0 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium">
             <Sparkles className="h-3 w-3 mr-1" />
             AI-Powered Healthcare Assistant
           </Badge>
-          <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-4 sm:mb-6 leading-tight">
             Your Intelligent
-            <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent"> Health Companion</span>
+            <span className="text-primary"> Health Companion</span>
           </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed px-4">
             Monitor your glucose levels, track meals, analyze health trends, and get personalized insights 
             with our advanced AI-powered healthcare assistant.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center px-4">
             <Link href={session?.user ? "/dashboard" : "/signup"}>
-              <Button size="lg" className="px-8 py-6 text-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all">
+              <Button size="lg" className="w-full sm:w-auto px-8 sm:px-10 py-5 sm:py-7 text-base sm:text-lg bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl hover:shadow-2xl transition-all">
                 {session?.user ? "Go to Dashboard" : "Start Your Health Journey"}
               </Button>
             </Link>
@@ -85,21 +85,21 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+      <section className="container mx-auto px-4 py-12 sm:py-16 md:py-24">
+        <div className="text-center mb-12 sm:mb-16">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3 sm:mb-4 px-4">
             Everything You Need for Better Health
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
             Our comprehensive platform combines cutting-edge AI with personalized healthcare monitoring
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <Card className="p-6 hover:shadow-xl transition-all duration-300 border-2 hover:border-blue-200 hover:-translate-y-1 bg-gradient-to-br from-white to-blue-50">
+          <Card className="p-6 hover:shadow-xl transition-all duration-300 border-2 hover:border-primary hover:-translate-y-1 bg-card group">
             <CardHeader>
-              <div className="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center mb-4">
-                <Activity className="h-7 w-7 text-blue-600" />
+              <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                <Activity className="h-7 w-7 text-primary" />
               </div>
               <CardTitle className="text-xl">Continuous Glucose Monitoring</CardTitle>
             </CardHeader>
@@ -110,10 +110,10 @@ export default function LandingPage() {
             </CardContent>
           </Card>
 
-          <Card className="p-6 hover:shadow-xl transition-all duration-300 border-2 hover:border-green-200 hover:-translate-y-1 bg-gradient-to-br from-white to-green-50">
+          <Card className="p-6 hover:shadow-xl transition-all duration-300 border-2 hover:border-primary hover:-translate-y-1 bg-card group">
             <CardHeader>
-              <div className="h-12 w-12 rounded-lg bg-green-100 flex items-center justify-center mb-4">
-                <Utensils className="h-7 w-7 text-green-600" />
+              <div className="h-14 w-14 rounded-xl bg-chart-2/10 flex items-center justify-center mb-4 group-hover:bg-chart-2/20 transition-colors">
+                <Utensils className="h-7 w-7 text-chart-2" />
               </div>
               <CardTitle className="text-xl">Meal Tracking</CardTitle>
             </CardHeader>
@@ -124,10 +124,10 @@ export default function LandingPage() {
             </CardContent>
           </Card>
 
-          <Card className="p-6 hover:shadow-xl transition-all duration-300 border-2 hover:border-purple-200 hover:-translate-y-1 bg-gradient-to-br from-white to-purple-50">
+          <Card className="p-6 hover:shadow-xl transition-all duration-300 border-2 hover:border-primary hover:-translate-y-1 bg-card group">
             <CardHeader>
-              <div className="h-12 w-12 rounded-lg bg-purple-100 flex items-center justify-center mb-4">
-                <TrendingUp className="h-7 w-7 text-purple-600" />
+              <div className="h-14 w-14 rounded-xl bg-chart-3/10 flex items-center justify-center mb-4 group-hover:bg-chart-3/20 transition-colors">
+                <TrendingUp className="h-7 w-7 text-chart-3" />
               </div>
               <CardTitle className="text-xl">Health Trends Analysis</CardTitle>
             </CardHeader>
@@ -138,10 +138,10 @@ export default function LandingPage() {
             </CardContent>
           </Card>
 
-          <Card className="p-6 hover:shadow-xl transition-all duration-300 border-2 hover:border-indigo-200 hover:-translate-y-1 bg-gradient-to-br from-white to-indigo-50">
+          <Card className="p-6 hover:shadow-xl transition-all duration-300 border-2 hover:border-primary hover:-translate-y-1 bg-card group">
             <CardHeader>
-              <div className="h-12 w-12 rounded-lg bg-indigo-100 flex items-center justify-center mb-4">
-                <MessageSquare className="h-7 w-7 text-indigo-600" />
+              <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                <MessageSquare className="h-7 w-7 text-primary" />
               </div>
               <CardTitle className="text-xl">AI Health Assistant</CardTitle>
             </CardHeader>
@@ -152,10 +152,10 @@ export default function LandingPage() {
             </CardContent>
           </Card>
 
-          <Card className="p-6 hover:shadow-xl transition-all duration-300 border-2 hover:border-orange-200 hover:-translate-y-1 bg-gradient-to-br from-white to-orange-50">
+          <Card className="p-6 hover:shadow-xl transition-all duration-300 border-2 hover:border-primary hover:-translate-y-1 bg-card group">
             <CardHeader>
-              <div className="h-12 w-12 rounded-lg bg-orange-100 flex items-center justify-center mb-4">
-                <BarChart3 className="h-7 w-7 text-orange-600" />
+              <div className="h-14 w-14 rounded-xl bg-chart-4/10 flex items-center justify-center mb-4 group-hover:bg-chart-4/20 transition-colors">
+                <BarChart3 className="h-7 w-7 text-chart-4" />
               </div>
               <CardTitle className="text-xl">Comprehensive Dashboard</CardTitle>
             </CardHeader>
@@ -166,10 +166,10 @@ export default function LandingPage() {
             </CardContent>
           </Card>
 
-          <Card className="p-6 hover:shadow-xl transition-all duration-300 border-2 hover:border-red-200 hover:-translate-y-1 bg-gradient-to-br from-white to-red-50">
+          <Card className="p-6 hover:shadow-xl transition-all duration-300 border-2 hover:border-primary hover:-translate-y-1 bg-card group">
             <CardHeader>
-              <div className="h-12 w-12 rounded-lg bg-red-100 flex items-center justify-center mb-4">
-                <Shield className="h-7 w-7 text-red-600" />
+              <div className="h-14 w-14 rounded-xl bg-destructive/10 flex items-center justify-center mb-4 group-hover:bg-destructive/20 transition-colors">
+                <Shield className="h-7 w-7 text-destructive" />
               </div>
               <CardTitle className="text-xl">Privacy & Security</CardTitle>
             </CardHeader>
@@ -183,30 +183,32 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-12 text-center text-white">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Ready to Transform Your Health?
-          </h2>
-          <p className="text-xl mb-8 text-blue-100">
-            Join thousands of users who trust HealthCare AI for their wellness journey
-          </p>
-          <Link href="/signup">
-            <Button size="lg" variant="secondary" className="px-8 py-4 text-lg">
-              Get Started Today
-            </Button>
-          </Link>
-        </div>
+      <section className="container mx-auto px-4 py-12 sm:py-16 md:py-24">
+        <Card className="bg-primary text-primary-foreground border-0 shadow-2xl">
+          <CardContent className="p-8 sm:p-10 md:p-12 text-center">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4">
+              Ready to Transform Your Health?
+            </h2>
+            <p className="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 opacity-90">
+              Join thousands of users who trust HealthCare AI for their wellness journey
+            </p>
+            <Link href="/signup">
+              <Button size="lg" variant="secondary" className="w-full sm:w-auto px-8 sm:px-10 py-5 sm:py-6 text-base sm:text-lg shadow-lg">
+                Get Started Today
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
       </section>
 
       {/* Footer */}
-      <footer className="container mx-auto px-4 py-12 border-t">
-        <div className="text-center text-gray-600">
+      <footer className="container mx-auto px-4 py-12 border-t border-border">
+        <div className="text-center text-muted-foreground">
           <div className="flex items-center justify-center space-x-2 mb-4">
-            <Heart className="h-6 w-6 text-red-500" />
-            <span className="text-xl font-bold text-gray-900">HealthCare AI</span>
+            <Heart className="h-6 w-6 text-destructive" />
+            <span className="text-xl font-bold text-foreground">HealthCare AI</span>
           </div>
-          <p>&copy; 2024 HealthCare AI. All rights reserved.</p>
+          <p>&copy; 2025 HealthCare AI. All rights reserved.</p>
         </div>
       </footer>
     </div>

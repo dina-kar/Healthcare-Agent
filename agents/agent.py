@@ -11,6 +11,7 @@ from agno.db.postgres import PostgresDb
 from dotenv import load_dotenv
 import asyncpg
 import json
+from decimal import Decimal
 from contextvars import ContextVar
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
@@ -29,6 +30,19 @@ db = PostgresDb(db_url=db_url)
 
 # Global context variable to store current user_id
 current_user_id: ContextVar[str] = ContextVar('current_user_id', default='default-user-id')
+
+# Helper function to convert Decimal to float for JSON serialization
+def decimal_to_float(obj):
+    """Recursively convert Decimal objects to float in dictionaries and lists"""
+    if isinstance(obj, Decimal):
+        return float(obj)
+    elif isinstance(obj, dict):
+        return {k: decimal_to_float(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [decimal_to_float(item) for item in obj]
+    elif isinstance(obj, tuple):
+        return tuple(decimal_to_float(item) for item in obj)
+    return obj
 
 # Database tools for direct PostgreSQL operations
 class HealthDataManager:
@@ -158,18 +172,21 @@ class HealthDataManager:
             """
             avg_result = await conn.fetchrow(avg_query, user_id, datetime.now() - timedelta(days=7))
             
-            return {
+            result_dict = {
                 'id': meal_id,
                 'stored': True,
                 'meal_data': meal_data,
                 'rolling_averages_7days': {
-                    'calories': round(avg_result['avg_calories'] or 0, 1),
-                    'carbs': round(avg_result['avg_carbs'] or 0, 1),
-                    'protein': round(avg_result['avg_protein'] or 0, 1),
-                    'fat': round(avg_result['avg_fat'] or 0, 1),
-                    'fiber': round(avg_result['avg_fiber'] or 0, 1)
+                    'calories': round(float(avg_result['avg_calories'] or 0), 1),
+                    'carbs': round(float(avg_result['avg_carbs'] or 0), 1),
+                    'protein': round(float(avg_result['avg_protein'] or 0), 1),
+                    'fat': round(float(avg_result['avg_fat'] or 0), 1),
+                    'fiber': round(float(avg_result['avg_fiber'] or 0), 1)
                 }
             }
+            
+            # Convert any remaining Decimal objects to float
+            return decimal_to_float(result_dict)
         finally:
             await conn.close()
     
@@ -201,12 +218,14 @@ class HealthDataManager:
             """
             meal_data = await conn.fetch(meal_query, user_id)
             
-            return {
-                'glucose_readings': [dict(row) for row in glucose_data],
-                'mood_entries': [dict(row) for row in mood_data],
-                'recent_meals': [dict(row) for row in meal_data],
+            result = {
+                'glucose_readings': [decimal_to_float(dict(row)) for row in glucose_data],
+                'mood_entries': [decimal_to_float(dict(row)) for row in mood_data],
+                'recent_meals': [decimal_to_float(dict(row)) for row in meal_data],
                 'summary_generated_at': datetime.now().isoformat()
             }
+            
+            return result
         finally:
             await conn.close()
 
@@ -217,7 +236,7 @@ health_db = HealthDataManager(db_url)
 # TOOL FUNCTIONS - All healthcare tools in one place
 # ============================================================================
 
-async def store_mood_data(mood: str, energy: int, stress: int, notes: str = "", user_id: str = "") -> str:
+async def store_mood_data(mood: str, energy: int, stress: int, notes: str = "") -> str:
     """Store mood data and provide wellness insights.
     
     Args:
@@ -225,13 +244,12 @@ async def store_mood_data(mood: str, energy: int, stress: int, notes: str = "", 
         energy: Energy level 1-10
         stress: Stress level 1-10
         notes: Optional notes about mood
-        user_id: User ID for data association (optional, will use context if not provided)
     
     Returns:
         JSON string with mood analysis and recommendations
     """
-    # Use provided user_id or fall back to context
-    actual_user_id = user_id or current_user_id.get()
+    # Get user_id from context (set by middleware from headers)
+    actual_user_id = current_user_id.get()
     print(f"[MOOD] Storing mood data for user: {actual_user_id}")
     result = await health_db.store_mood_entry(actual_user_id, mood, energy, stress, notes)
     
@@ -253,18 +271,17 @@ async def store_mood_data(mood: str, energy: int, stress: int, notes: str = "", 
     return json.dumps(insights, indent=2)
 
 
-async def store_glucose_data(glucose_value: float, user_id: str = "") -> str:
+async def store_glucose_data(glucose_value: float) -> str:
     """Store glucose reading and provide diabetes management guidance.
     
     Args:
         glucose_value: Glucose reading in mg/dL (valid range: 60-400)
-        user_id: User ID for data association (optional, will use context if not provided)
     
     Returns:
         JSON string with glucose status and recommendations
     """
-    # Use provided user_id or fall back to context
-    actual_user_id = user_id or current_user_id.get()
+    # Get user_id from context (set by middleware from headers)
+    actual_user_id = current_user_id.get()
     print(f"[GLUCOSE] Storing glucose reading for user: {actual_user_id}")
     result = await health_db.store_glucose_reading(actual_user_id, glucose_value)
     
@@ -280,8 +297,7 @@ async def store_glucose_data(glucose_value: float, user_id: str = "") -> str:
 
 async def store_meal_data(meal_type: str, meal_name: str, calories: int, 
                          carbs: float, protein: float, fat: float, 
-                         fiber: float = 0, glycemic_impact: str = "medium", 
-                         user_id: str = "") -> str:
+                         fiber: float = 0, glycemic_impact: str = "medium") -> str:
     """Store meal data and provide nutritional analysis.
     
     Args:
@@ -293,13 +309,12 @@ async def store_meal_data(meal_type: str, meal_name: str, calories: int,
         fat: Fat in grams
         fiber: Fiber in grams (optional)
         glycemic_impact: Glycemic impact (low/medium/high)
-        user_id: User ID for data association (optional, will use context if not provided)
     
     Returns:
         JSON string with nutritional analysis
     """
-    # Use provided user_id or fall back to context
-    actual_user_id = user_id or current_user_id.get()
+    # Get user_id from context (set by middleware from headers)
+    actual_user_id = current_user_id.get()
     print(f"[MEAL] Storing meal data for user: {actual_user_id}")
     
     # Ensure all numeric values are properly typed
@@ -334,17 +349,14 @@ async def store_meal_data(meal_type: str, meal_name: str, calories: int,
     return json.dumps(analysis, indent=2)
 
 
-async def get_health_insights(user_id: str = "") -> str:
+async def get_health_insights() -> str:
     """Get comprehensive health insights from stored data.
-    
-    Args:
-        user_id: User ID for data retrieval (optional, will use context if not provided)
     
     Returns:
         JSON string with comprehensive health summary and trends
     """
-    # Use provided user_id or fall back to context
-    actual_user_id = user_id or current_user_id.get()
+    # Get user_id from context (set by middleware from headers)
+    actual_user_id = current_user_id.get()
     print(f"[INSIGHTS] Getting health insights for user: {actual_user_id}")
     summary = await health_db.get_user_health_summary(actual_user_id)
     
@@ -407,18 +419,17 @@ async def get_health_insights(user_id: str = "") -> str:
     return json.dumps(insights, indent=2)
 
 
-async def get_meal_plan_suggestions(dietary_preferences: str = "balanced", user_id: str = "") -> str:
+async def get_meal_plan_suggestions(dietary_preferences: str = "balanced") -> str:
     """Generate personalized meal plan suggestions.
     
     Args:
         dietary_preferences: Dietary preference (balanced/low-carb/high-protein/vegetarian)
-        user_id: User ID for data retrieval (optional, will use context if not provided)
     
     Returns:
         JSON string with meal suggestions
     """
-    # Use provided user_id or fall back to context
-    actual_user_id = user_id or current_user_id.get()
+    # Get user_id from context (set by middleware from headers)
+    actual_user_id = current_user_id.get()
     print(f"[MEAL_PLAN] Getting meal plan for user: {actual_user_id}")
     summary = await health_db.get_user_health_summary(actual_user_id)
     
@@ -513,11 +524,11 @@ healthcare_agent = Agent(
         "You are a comprehensive healthcare AI assistant specializing in diabetes management and overall wellness.",
         "You help users track mood, glucose levels, and nutrition while providing personalized insights.",
         "",
-        "**NOTE: User Authentication**",
-        "- User authentication is handled automatically via headers",
-        "- You do NOT need to pass user_id parameters to tool functions",
-        "- All data is automatically stored for the currently logged-in user",
-        "- Simply call the tools with the required data parameters",
+        "**IMPORTANT: User Authentication**",
+        "- User authentication is handled automatically via request headers",
+        "- You do NOT need to pass user_id parameters - it's handled automatically",
+        "- All data is automatically stored for the currently authenticated user",
+        "- Simply call the tools with the required data parameters only",
         "",
         "**Core Capabilities:**",
         "1. Mood Tracking: Store mood, energy, and stress levels with wellness recommendations",
@@ -528,14 +539,44 @@ healthcare_agent = Agent(
         "",
         "**When to Use Each Tool:**",
         "- store_mood_data(mood, energy, stress, notes): When user shares how they're feeling",
+        "  Example: store_mood_data('good', 7, 4, 'feeling energized')",
+        "",
         "- store_glucose_data(glucose_value): When user provides a glucose/blood sugar reading",
+        "  Example: store_glucose_data(120)",
+        "",
         "- store_meal_data(meal_type, meal_name, calories, carbs, protein, fat, fiber, glycemic_impact): When user logs food",
+        "  Example: store_meal_data('breakfast', 'Oatmeal with berries', 300, 45, 10, 8, 5, 'medium')",
+        "  **IMPORTANT FOR MEALS**: You have extensive nutritional knowledge - USE IT!",
+        "  - When users describe meals, automatically estimate realistic nutritional values",
+        "  - Don't ask users for calories, carbs, protein, etc. - calculate them yourself",
+        "  - Use your knowledge of common foods and portion sizes",
+        "  - Examples:",
+        "    * 'Oatmeal with berries for breakfast' → ~300 cal, 45g carbs, 10g protein, 8g fat, 5g fiber, medium GI",
+        "    * 'Chicken salad for lunch' → ~350 cal, 15g carbs, 30g protein, 18g fat, 4g fiber, low GI",
+        "    * 'Pizza slice for dinner' → ~285 cal, 36g carbs, 12g protein, 10g fat, 2g fiber, high GI",
+        "  - Ask for clarification ONLY if the meal description is truly ambiguous",
+        "  - For portion sizes, assume standard/medium portions unless specified",
+        "",
         "- get_health_insights(): When user asks about trends, patterns, or overall health status",
+        "  Example: get_health_insights()",
+        "",
         "- get_meal_plan_suggestions(dietary_preferences): When user asks for meal ideas or dietary guidance",
+        "  Example: get_meal_plan_suggestions('low-carb')",
         "",
         "**Important Guidelines:**",
         "- ALWAYS wait for tool execution to complete before providing your response",
         "- After storing data, acknowledge the storage and provide relevant insights from the tool result",
+        "- **FOR MEAL LOGGING**: Be proactive! Use your nutritional knowledge to estimate values",
+        "  * When a user says 'I had X for breakfast/lunch/dinner', immediately log it with estimated nutritional data",
+        "  * Use realistic, research-based estimates for common foods",
+        "  * Only ask for clarification if the description is genuinely unclear (e.g., 'I had food')",
+        "  * If portion isn't specified, assume a standard/medium serving size",
+        "  * Common meal examples with estimates:",
+        "    - Oatmeal with berries: 300 cal, 45g carbs, 10g protein, 8g fat, 5g fiber, medium GI",
+        "    - Scrambled eggs with toast: 350 cal, 30g carbs, 20g protein, 15g fat, 3g fiber, medium GI",
+        "    - Grilled chicken salad: 350 cal, 15g carbs, 35g protein, 18g fat, 5g fiber, low GI",
+        "    - Pasta with tomato sauce: 400 cal, 70g carbs, 12g protein, 8g fat, 4g fiber, high GI",
+        "    - Turkey sandwich: 350 cal, 40g carbs, 25g protein, 10g fat, 3g fiber, medium GI",
         "- Be supportive, empathetic, and encouraging in all interactions",
         "- Provide actionable recommendations based on the data",
         "- For concerning values (very high/low glucose, severe stress), emphasize consulting healthcare providers",

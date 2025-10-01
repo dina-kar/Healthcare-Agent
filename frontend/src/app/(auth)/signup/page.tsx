@@ -57,19 +57,19 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-2 mb-4">
-            <Heart className="h-8 w-8 text-red-500" />
-            <span className="text-2xl font-bold text-gray-900">HealthCare AI</span>
+            <Heart className="h-8 w-8 text-destructive" />
+            <span className="text-2xl font-bold text-primary">HealthCare AI</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Create your account</h1>
-          <p className="text-gray-600">Start your health journey today</p>
+          <h1 className="text-2xl font-bold text-foreground">Create your account</h1>
+          <p className="text-muted-foreground">Start your health journey today</p>
         </div>
 
-        <Card>
+        <Card className="shadow-xl border-border">
           <CardHeader>
             <CardTitle>Sign Up</CardTitle>
             <CardDescription>
@@ -157,14 +157,14 @@ export default function SignUpPage() {
               </div>
 
               {error && (
-                <div className="text-red-500 text-sm text-center">
+                <div className="text-destructive text-sm text-center">
                   {error}
                 </div>
               )}
 
               <Button 
                 type="submit" 
-                className="w-full" 
+                className="w-full bg-primary hover:bg-primary/90" 
                 disabled={isLoading}
               >
                 {isLoading ? "Creating account..." : "Create Account"}
@@ -172,16 +172,16 @@ export default function SignUpPage() {
             </form>
 
             <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-muted-foreground">
                 Already have an account?{" "}
-                <Link href="/signin" className="text-blue-600 hover:underline font-medium">
+                <Link href="/signin" className="text-primary hover:underline font-medium">
                   Sign in
                 </Link>
               </p>
             </div>
 
             <div className="mt-4 text-center">
-              <Link href="/" className="text-sm text-gray-500 hover:underline">
+              <Link href="/" className="text-sm text-muted-foreground hover:underline">
                 Back to home
               </Link>
             </div>

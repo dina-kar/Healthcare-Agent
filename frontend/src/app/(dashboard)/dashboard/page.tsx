@@ -55,7 +55,7 @@ export default function DashboardPage() {
       <div className="flex items-center justify-center h-96">
         <div className="flex items-center space-x-2">
           <Loader2 className="h-4 w-4 animate-spin" />
-          <p className="text-gray-600">Loading your health data...</p>
+          <p className="text-gray-600">Loading ...</p>
         </div>
       </div>
     );
@@ -141,21 +141,22 @@ export default function DashboardPage() {
   const totalCaloriesToday = todayMeals.reduce((sum, meal) => sum + meal.calories, 0);
 
   return (
-    <div className="p-8 space-y-8 bg-gradient-to-br from-blue-50 via-white to-purple-50 min-h-screen">
+    <div className="space-y-6 lg:space-y-8 bg-background min-h-screen">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl sm:text-4xl font-bold text-primary">
             Health Dashboard
           </h1>
-          <p className="text-gray-600 mt-2">Welcome back, {session?.user?.name}! Here's your comprehensive health overview</p>
+          <p className="text-muted-foreground mt-2 text-sm sm:text-base">Welcome back, {session?.user?.name}! Here's your comprehensive health overview</p>
         </div>
-        <div className="flex items-center space-x-3">
-          <Badge variant="outline" className="flex items-center space-x-1 px-3 py-2">
-            <Clock className="h-4 w-4" />
-            <span>Updated: {new Date().toLocaleTimeString()}</span>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Badge variant="outline" className="flex items-center space-x-1 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm">
+            <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Updated: {new Date().toLocaleTimeString()}</span>
+            <span className="sm:hidden">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
           </Badge>
-          <Button onClick={refetch} variant="outline" size="sm">
+          <Button onClick={refetch} variant="outline" size="sm" className="text-xs sm:text-sm">
             Refresh
           </Button>
         </div>
@@ -163,16 +164,16 @@ export default function DashboardPage() {
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-md hover:shadow-lg transition-shadow">
+        <Card className="bg-card border-border shadow-lg hover:shadow-xl transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-blue-900">Current Glucose</CardTitle>
-            <Activity className="h-5 w-5 text-blue-600" />
+            <CardTitle className="text-sm font-medium text-foreground">Current Glucose</CardTitle>
+            <Activity className="h-5 w-5 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-blue-900">
+            <div className="text-3xl font-bold text-foreground">
               {recentGlucose?.value ? `${recentGlucose.value}` : 'No data'}
             </div>
-            <p className="text-xs text-blue-700 mb-2">mg/dL</p>
+            <p className="text-xs text-muted-foreground mb-2">mg/dL</p>
             <div className="flex items-center space-x-2 mt-2">
               <Badge 
                 variant={glucoseStatus === 'normal' ? 'default' : glucoseStatus === 'high' ? 'destructive' : 'secondary'}
@@ -183,11 +184,11 @@ export default function DashboardPage() {
               {recentGlucose && glucoseTrend !== 0 && (
                 <div className="flex items-center text-sm">
                   {glucoseTrend > 0 ? (
-                    <TrendingUp className="h-4 w-4 text-red-500 mr-1" />
+                    <TrendingUp className="h-4 w-4 text-destructive mr-1" />
                   ) : (
-                    <TrendingDown className="h-4 w-4 text-green-500 mr-1" />
+                    <TrendingDown className="h-4 w-4 text-chart-2 mr-1" />
                   )}
-                  <span className={glucoseTrend > 0 ? "text-red-500 font-semibold" : "text-green-500 font-semibold"}>
+                  <span className={glucoseTrend > 0 ? "text-destructive font-semibold" : "text-chart-2 font-semibold"}>
                     {Math.abs(glucoseTrend).toFixed(1)}
                   </span>
                 </div>
@@ -196,65 +197,65 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 shadow-md hover:shadow-lg transition-shadow">
+        <Card className="bg-card border-border shadow-lg hover:shadow-xl transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-purple-900">Average Glucose</CardTitle>
-            <Target className="h-5 w-5 text-purple-600" />
+            <CardTitle className="text-sm font-medium text-foreground">Average Glucose</CardTitle>
+            <Target className="h-5 w-5 text-chart-2" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-purple-900">{avgGlucose}</div>
-            <p className="text-xs text-purple-700 mb-2">mg/dL</p>
+            <div className="text-3xl font-bold text-foreground">{avgGlucose}</div>
+            <p className="text-xs text-muted-foreground mb-2">mg/dL</p>
             <Progress value={(avgGlucose / 200) * 100} className="mt-2 h-2" />
-            <p className="text-xs text-purple-700 mt-2 font-medium">7-day average</p>
+            <p className="text-xs text-muted-foreground mt-2 font-medium">7-day average</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 shadow-md hover:shadow-lg transition-shadow">
+        <Card className="bg-card border-border shadow-lg hover:shadow-xl transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-green-900">Mood Score</CardTitle>
-            <Brain className="h-5 w-5 text-green-600" />
+            <CardTitle className="text-sm font-medium text-foreground">Mood Score</CardTitle>
+            <Brain className="h-5 w-5 text-chart-3" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-green-900">{avgMood.toFixed(1)}</div>
-            <p className="text-xs text-green-700 mb-2">out of 5.0</p>
+            <div className="text-3xl font-bold text-foreground">{avgMood.toFixed(1)}</div>
+            <p className="text-xs text-muted-foreground mb-2">out of 5.0</p>
             <Progress value={(avgMood / 5) * 100} className="mt-2 h-2" />
-            <p className="text-xs text-green-700 mt-2 font-medium">Weekly average</p>
+            <p className="text-xs text-muted-foreground mt-2 font-medium">Weekly average</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 shadow-md hover:shadow-lg transition-shadow">
+        <Card className="bg-card border-border shadow-lg hover:shadow-xl transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-orange-900">Today's Calories</CardTitle>
-            <Utensils className="h-5 w-5 text-orange-600" />
+            <CardTitle className="text-sm font-medium text-foreground">Today's Calories</CardTitle>
+            <Utensils className="h-5 w-5 text-chart-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-orange-900">{totalCaloriesToday}</div>
-            <p className="text-xs text-orange-700 mb-2">kcal consumed</p>
+            <div className="text-3xl font-bold text-foreground">{totalCaloriesToday}</div>
+            <p className="text-xs text-muted-foreground mb-2">kcal consumed</p>
             <Progress value={(totalCaloriesToday / 2000) * 100} className="mt-2 h-2" />
-            <p className="text-xs text-orange-700 mt-2 font-medium">Target: 2000 kcal</p>
+            <p className="text-xs text-muted-foreground mt-2 font-medium">Target: 2000 kcal</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Charts */}
       <Tabs defaultValue="glucose" className="space-y-6">
-        <TabsList className="bg-white/80 backdrop-blur-sm p-1 shadow-sm">
-          <TabsTrigger value="glucose" className="data-[state=active]:bg-blue-500 data-[state=active]:text-white">
+        <TabsList className="bg-card border border-border shadow-sm">
+          <TabsTrigger value="glucose" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             📊 Glucose Trends
           </TabsTrigger>
-          <TabsTrigger value="mood" className="data-[state=active]:bg-green-500 data-[state=active]:text-white">
+          <TabsTrigger value="mood" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             😊 Mood & Wellness
           </TabsTrigger>
-          <TabsTrigger value="meals" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">
+          <TabsTrigger value="meals" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             🍽️ Meal Analysis
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="glucose" className="space-y-4">
-          <Card className="shadow-lg">
-            <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 border-b">
-              <CardTitle className="text-xl text-blue-900">Glucose Levels (Last 48 Hours)</CardTitle>
-              <CardDescription className="text-blue-700">
+          <Card className="shadow-xl border-border">
+            <CardHeader className="border-b border-border">
+              <CardTitle className="text-xl text-foreground">Glucose Levels (Last 48 Hours)</CardTitle>
+              <CardDescription className="text-muted-foreground">
                 Continuous glucose monitoring with target range indicators (80-140 mg/dL)
               </CardDescription>
             </CardHeader>
@@ -298,10 +299,10 @@ export default function DashboardPage() {
 
         <TabsContent value="mood" className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-green-50 to-green-100 border-b">
-                <CardTitle className="text-xl text-green-900">Mood Trends</CardTitle>
-                <CardDescription className="text-green-700">Daily mood, energy, and stress levels over time</CardDescription>
+            <Card className="shadow-xl border-border">
+              <CardHeader className="border-b border-border">
+                <CardTitle className="text-xl text-foreground">Mood Trends</CardTitle>
+                <CardDescription className="text-muted-foreground">Daily mood, energy, and stress levels over time</CardDescription>
               </CardHeader>
               <CardContent className="pt-6">
                 <ResponsiveContainer width="100%" height={300}>
@@ -325,17 +326,17 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-green-50 to-green-100 border-b">
-                <CardTitle className="text-xl text-green-900">Recent Mood Entries</CardTitle>
-                <CardDescription className="text-green-700">Your latest emotional wellness check-ins</CardDescription>
+            <Card className="shadow-xl border-border">
+              <CardHeader className="border-b border-border">
+                <CardTitle className="text-xl text-foreground">Recent Mood Entries</CardTitle>
+                <CardDescription className="text-muted-foreground">Your latest emotional wellness check-ins</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3 pt-6">
                 {healthData.moodEntries.slice(-5).reverse().map((entry, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200 hover:shadow-md transition-shadow">
+                  <div key={index} className="flex items-center justify-between p-4 bg-accent/30 rounded-xl border border-border hover:shadow-md transition-shadow">
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-1">
-                        <p className="font-semibold capitalize text-lg">
+                        <p className="font-semibold capitalize text-lg text-foreground">
                           {entry.mood === 'great' ? '😄' : entry.mood === 'good' ? '🙂' : entry.mood === 'okay' ? '😐' : entry.mood === 'poor' ? '😔' : '😢'} 
                           {' '}{entry.mood}
                         </p>
@@ -344,17 +345,17 @@ export default function DashboardPage() {
                         </Badge>
                       </div>
                       {entry.notes && (
-                        <p className="text-sm text-gray-600 italic mt-1">"{entry.notes}"</p>
+                        <p className="text-sm text-muted-foreground italic mt-1">"{entry.notes}"</p>
                       )}
                     </div>
                     <div className="text-right text-sm space-y-1 ml-4">
                       <p className="flex items-center justify-end space-x-1">
-                        <span className="text-gray-500">Energy:</span>
-                        <span className="font-semibold text-orange-600">{entry.energy}/10</span>
+                        <span className="text-muted-foreground">Energy:</span>
+                        <span className="font-semibold text-chart-4">{entry.energy}/10</span>
                       </p>
                       <p className="flex items-center justify-end space-x-1">
-                        <span className="text-gray-500">Stress:</span>
-                        <span className="font-semibold text-red-600">{entry.stress}/10</span>
+                        <span className="text-muted-foreground">Stress:</span>
+                        <span className="font-semibold text-destructive">{entry.stress}/10</span>
                       </p>
                     </div>
                   </div>
@@ -366,10 +367,10 @@ export default function DashboardPage() {
 
         <TabsContent value="meals" className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-orange-50 to-orange-100 border-b">
-                <CardTitle className="text-xl text-orange-900">Meal Distribution</CardTitle>
-                <CardDescription className="text-orange-700">Breakdown of meal types over the past week</CardDescription>
+            <Card className="shadow-xl border-border">
+              <CardHeader className="border-b border-border">
+                <CardTitle className="text-xl text-foreground">Meal Distribution</CardTitle>
+                <CardDescription className="text-muted-foreground">Breakdown of meal types over the past week</CardDescription>
               </CardHeader>
               <CardContent className="pt-6 flex items-center justify-center">
                 <ResponsiveContainer width="100%" height={300}>
@@ -401,18 +402,18 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-orange-50 to-orange-100 border-b">
-                <CardTitle className="text-xl text-orange-900">Recent Meals</CardTitle>
-                <CardDescription className="text-orange-700">Your latest meal entries with nutritional info</CardDescription>
+            <Card className="shadow-xl border-border">
+              <CardHeader className="border-b border-border">
+                <CardTitle className="text-xl text-foreground">Recent Meals</CardTitle>
+                <CardDescription className="text-muted-foreground">Your latest meal entries with nutritional info</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3 pt-6">
                 {healthData.mealHistory.slice(-5).reverse().map((meal) => (
-                  <div key={meal.id} className="flex items-center justify-between p-4 bg-gradient-to-r from-white to-orange-50 rounded-xl border border-orange-200 hover:shadow-md transition-shadow">
+                  <div key={meal.id} className="flex items-center justify-between p-4 bg-accent/30 rounded-xl border border-border hover:shadow-md transition-shadow">
                     <div className="flex-1">
-                      <p className="font-semibold text-lg text-gray-900">{meal.name}</p>
+                      <p className="font-semibold text-lg text-foreground">{meal.name}</p>
                       <div className="flex items-center space-x-2 mt-1">
-                        <p className="text-sm text-gray-600 capitalize font-medium">{meal.type}</p>
+                        <p className="text-sm text-muted-foreground capitalize font-medium">{meal.type}</p>
                         <Badge 
                           variant={meal.glycemicImpact === 'low' ? 'default' : meal.glycemicImpact === 'medium' ? 'secondary' : 'destructive'}
                           className="text-xs"
@@ -422,9 +423,9 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <div className="text-right space-y-1 ml-4">
-                      <p className="font-bold text-lg text-orange-600">{meal.calories} kcal</p>
-                      <p className="text-sm text-gray-600">{meal.carbs}g carbs</p>
-                      <p className="text-xs text-gray-500">{meal.protein}g protein • {meal.fat}g fat</p>
+                      <p className="font-bold text-lg text-primary">{meal.calories} kcal</p>
+                      <p className="text-sm text-muted-foreground">{meal.carbs}g carbs</p>
+                      <p className="text-xs text-muted-foreground">{meal.protein}g protein • {meal.fat}g fat</p>
                     </div>
                   </div>
                 ))}
