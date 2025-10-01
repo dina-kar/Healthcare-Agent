@@ -69,13 +69,19 @@ async function ensureUser(u: SeedUser) {
   } else {
     // Use Better Auth to create (handles password hashing + account row)
     try {
-      await auth.api.signUpEmail({
+      const response = await auth.api.signUpEmail({
         body: {
           email: u.email,
           password: u.password,
           name: u.name,
         },
+        asResponse: true,
       });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.warn(`Signup warning for ${u.email}:`, errorData);
+      }
     } catch (err: any) {
       // If signup raced with another process, fall back to lookup
       console.warn(`Signup warning for ${u.email}:`, err?.message ?? err);
