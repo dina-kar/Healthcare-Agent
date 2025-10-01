@@ -136,11 +136,16 @@ class HealthDataManager:
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
                 RETURNING *
             """
+            # Ensure all numeric values are properly converted to float
             result = await conn.fetchrow(
                 query, 
                 meal_id, user_id, meal_data['type'], meal_data['name'],
-                meal_data['calories'], meal_data['carbs'], meal_data['protein'],
-                meal_data['fat'], meal_data.get('fiber', 0), meal_data['glycemic_impact'],
+                int(meal_data['calories']), 
+                float(meal_data['carbs']), 
+                float(meal_data['protein']),
+                float(meal_data['fat']), 
+                float(meal_data.get('fiber', 0.0)), 
+                meal_data['glycemic_impact'],
                 datetime.now()
             )
             
@@ -296,14 +301,16 @@ async def store_meal_data(meal_type: str, meal_name: str, calories: int,
     # Use provided user_id or fall back to context
     actual_user_id = user_id or current_user_id.get()
     print(f"[MEAL] Storing meal data for user: {actual_user_id}")
+    
+    # Ensure all numeric values are properly typed
     meal_data = {
         'type': meal_type,
         'name': meal_name,
-        'calories': calories,
-        'carbs': carbs,
-        'protein': protein,
-        'fat': fat,
-        'fiber': fiber,
+        'calories': int(calories),
+        'carbs': float(carbs),
+        'protein': float(protein),
+        'fat': float(fat),
+        'fiber': float(fiber),
         'glycemic_impact': glycemic_impact
     }
     result = await health_db.store_meal_entry(actual_user_id, meal_data)
