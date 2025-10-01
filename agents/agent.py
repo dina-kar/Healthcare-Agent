@@ -18,6 +18,8 @@ from starlette.requests import Request
 # Load environment variables from a .env file
 load_dotenv()
 
+port = int(os.environ.get("PORT", 8000))
+
 # Database connection
 db_url = os.getenv("DATABASE_URL", "postgresql+psycopg://user:password@localhost:5432/healthcare_db")
 db = PostgresDb(db_url=db_url)
@@ -589,4 +591,4 @@ if __name__ == "__main__":
     print("✅ Mood tracking, glucose monitoring, meal logging")
     print("✅ Health insights and meal planning")
     print("=" * 50)
-    agent_os.serve(app="agent:app", reload=True, port=8000)
+    agent_os.serve(app="agent:app", reload=True, port=port)

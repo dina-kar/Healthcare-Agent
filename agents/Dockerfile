@@ -10,6 +10,7 @@ RUN apk add --no-cache \
     musl-dev \
     postgresql-dev \
     libffi-dev \
+    curl \
     && rm -rf /var/cache/apk/*
 
 # Copy dependency files first for better layer caching
