@@ -14,22 +14,7 @@ RUN \
   else echo "Lockfile not found." && exit 1; \
   fi
 
-# Build the application
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-
-# Set environment for build
-ENV NEXT_TELEMETRY_DISABLED 1
-
-# Build the application
-RUN \
-  if [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run build; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
-
-# Production image with database setup and seeding
+# Development image with database setup and seeding
 FROM base AS runner
 WORKDIR /app
 
@@ -40,21 +25,11 @@ RUN apk add --no-cache postgresql-client wget
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy the public folder
-COPY --from=builder /app/public ./public
-
-# Set the correct permission for prerender cache
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
-
-# Copy built application
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-# Copy package files for database operations
+# Copy package files and dependencies
+COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/package.json ./
 COPY --from=deps /app/pnpm-lock.yaml ./
-COPY --from=deps /app/node_modules ./node_modules
+COPY . .
 
 # Switch to non-root user
 USER nextjs
@@ -65,35 +40,15 @@ EXPOSE 3000
 # Set environment variables
 ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
+ENV NODE_ENV=development
+ENV NEXT_TELEMETRY_DISABLED 1
 
 # Add a script to wait for postgres and run database setup
-COPY --chown=nextjs:nodejs <<EOF /app/setup-db.sh
-#!/bin/sh
-echo "Waiting for PostgreSQL to be ready..."
-
-# Wait for PostgreSQL to be ready
-until pg_isready -h postgres -p 5432 -U user; do
-  echo "PostgreSQL is not ready yet. Waiting..."
-  sleep 2
-done
-
-echo "PostgreSQL is ready! Running database setup..."
-
-# Run database push and seed
-pnpm run db:push
-pnpm run seed
-
-echo "Database setup completed! Starting the application..."
-
-# Start the Next.js application
-exec node server.js
-EOF
-
-RUN chmod +x /app/setup-db.sh
+RUN echo '#!/bin/sh\necho "Waiting for PostgreSQL to be ready..."\nuntil pg_isready -h postgres -p 5432 -U user; do\necho "PostgreSQL is not ready yet. Waiting..."\nsleep 2\ndone\necho "PostgreSQL is ready! Running database setup..."\npnpm run db:push\npnpm run seed\necho "Database setup completed! Starting dev server..."\nexec pnpm run dev' > /tmp/setup-dev.sh && chmod +x /tmp/setup-dev.sh
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
 
-# Run database setup script then start the application
-CMD ["/app/setup-db.sh"]
+# Run database setup script then start the dev server
+CMD ["/tmp/setup-dev.sh"]
