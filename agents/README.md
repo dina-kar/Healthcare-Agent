@@ -176,14 +176,14 @@ Expected: Personalized breakfast, lunch, dinner, and snack suggestions with nutr
 
 ### CopilotKit Configuration
 
-The agent is served at `http://localhost:7777/agui` and integrates with CopilotKit via:
+The agent is served at `http://localhost:8000/agui` and integrates with CopilotKit via:
 
 ```typescript
 // frontend/src/app/api/copilotkit/route.ts
 const runtime = new CopilotRuntime({
   agents: {
     "agno_agent": new AgnoAgent({
-      url: "http://localhost:7777/agui"
+      url: "http://localhost:8000/agui"
     }),
   }
 });
@@ -229,7 +229,7 @@ All tools return structured JSON strings for easy parsing and rendering:
 ./stop_agent.sh
 
 # Verify port is free
-lsof -i:7777
+lsof -i:8000
 
 # Start fresh
 ./run_agent.sh

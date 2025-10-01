@@ -53,5 +53,5 @@ wheels/
 .venv
 #Environment Variables
 .env
-.env.*
+
 

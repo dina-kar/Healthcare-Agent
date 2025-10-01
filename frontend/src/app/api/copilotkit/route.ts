@@ -26,7 +26,7 @@ export const POST = async (req: NextRequest) => {
       agents: {
         // Our FastAPI endpoint URL with user context
         "agno_agent": new AgnoAgent({
-          url: "http://localhost:7777/agui",
+          url: process.env.AGENT_BACKEND_URL || "http://localhost:8000/agui",
           // Pass user context as headers
           headers: {
             "X-User-Id": userId,

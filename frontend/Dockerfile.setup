@@ -4,7 +4,7 @@ FROM node:20-alpine AS base
 # Install dependencies only when needed
 FROM base AS deps
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat postgresql-client wget
 WORKDIR /app
 
 # Copy package files for better layer caching
@@ -29,9 +29,12 @@ RUN \
   else echo "Lockfile not found." && exit 1; \
   fi
 
-# Production image, copy all the files and run next
+# Production image with database setup and seeding
 FROM base AS runner
 WORKDIR /app
+
+# Install runtime dependencies including postgresql-client for database operations
+RUN apk add --no-cache postgresql-client wget
 
 # Create non-root user for security
 RUN addgroup --system --gid 1001 nodejs
@@ -48,6 +51,11 @@ RUN chown nextjs:nodejs .next
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Copy package files for database operations
+COPY --from=deps /app/package.json ./
+COPY --from=deps /app/pnpm-lock.yaml ./
+COPY --from=deps /app/node_modules ./node_modules
+
 # Switch to non-root user
 USER nextjs
 
@@ -58,10 +66,34 @@ EXPOSE 3000
 ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
 
+# Add a script to wait for postgres and run database setup
+COPY --chown=nextjs:nodejs <<EOF /app/setup-db.sh
+#!/bin/sh
+echo "Waiting for PostgreSQL to be ready..."
+
+# Wait for PostgreSQL to be ready
+until pg_isready -h postgres -p 5432 -U user; do
+  echo "PostgreSQL is not ready yet. Waiting..."
+  sleep 2
+done
+
+echo "PostgreSQL is ready! Running database setup..."
+
+# Run database push and seed
+pnpm run db:push
+pnpm run seed
+
+echo "Database setup completed! Starting the application..."
+
+# Start the Next.js application
+exec node server.js
+EOF
+
+RUN chmod +x /app/setup-db.sh
+
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
 
-# server.js is created by next build from the standalone output
-# https://nextjs.org/docs/pages/api-reference/next-config-js/output
-CMD ["node", "server.js"]
+# Run database setup script then start the application
+CMD ["/app/setup-db.sh"]

@@ -9,9 +9,9 @@ pkill -9 -f "python.*agent.py"
 sleep 1
 
 # Check if port is free
-if lsof -Pi :7777 -sTCP:LISTEN -t >/dev/null ; then
-    echo "Port 7777 is still in use. Force killing processes..."
-    lsof -ti:7777 | xargs kill -9 2>/dev/null
+if lsof -Pi :8000 -sTCP:LISTEN -t >/dev/null ; then
+    echo "Port 8000 is still in use. Force killing processes..."
+    lsof -ti:8000 | xargs kill -9 2>/dev/null
     sleep 1
 fi
 

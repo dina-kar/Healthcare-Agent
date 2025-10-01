@@ -80,11 +80,6 @@ export default function LandingPage() {
                 {session?.user ? "Go to Dashboard" : "Start Your Health Journey"}
               </Button>
             </Link>
-            <Link href="/sigin">
-              <Button size="lg" variant="outline" className="px-8 py-6 text-lg border-2 hover:bg-blue-50 transition-all">
-                Sign In
-              </Button>
-            </Link>
           </div>
         </div>
       </section>

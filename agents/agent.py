@@ -566,7 +566,7 @@ class UserIdMiddleware(BaseHTTPMiddleware):
 # Serve the single agent using AGUI
 # For single agents, we create an AgentOS with the agent directly
 agent_os = AgentOS(
-    agents=[healthcare_agent],  # Changed from teams to agents
+    agents=[healthcare_agent], 
     interfaces=[AGUI(agent=healthcare_agent)],
     os_id="healthcare-single-agent-system"
 )
@@ -583,11 +583,10 @@ app.add_middleware(UserIdMiddleware)
 
 if __name__ == "__main__":
     print("=" * 50)
-    print("Healthcare AI Assistant - Single Agent System")
+    print("Healthcare AI Agent System")
     print("=" * 50)
     print("✅ All tools integrated into one comprehensive agent")
     print("✅ Mood tracking, glucose monitoring, meal logging")
     print("✅ Health insights and meal planning")
-    print("✅ No Team orchestration - direct agent communication")
     print("=" * 50)
-    agent_os.serve(app="agent:app", reload=True, port=7777)
+    agent_os.serve(app="agent:app", reload=True, port=8000)

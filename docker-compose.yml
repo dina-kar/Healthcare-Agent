@@ -17,20 +17,6 @@ services:
       retries: 5
       start_period: 10s
 
-  # Database seeding service - runs once after postgres is ready
-  db-seed:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.seed
-    container_name: healthcare-db-seed
-    environment:
-      DATABASE_URL: postgresql://user:password@postgres:5432/healthcare_db
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - healthcare-network
-    restart: "no"  # Run once and exit
 
   # Python agent backend
   backend:
@@ -40,16 +26,13 @@ services:
     container_name: healthcare-backend
     environment:
       DATABASE_URL: postgresql://user:password@postgres:5432/healthcare_db
-      # Add other environment variables as needed
-      # GOOGLE_GENAI_API_KEY: ${GOOGLE_GENAI_API_KEY}
-      # OPENAI_API_KEY: ${OPENAI_API_KEY}
+      # Add Google Gemini API Key
+      # GOOGLE_API_KEY: ${GOOGLE_API_KEY}
     ports:
       - "8000:8000"
     depends_on:
       postgres:
         condition: service_healthy
-      db-seed:
-        condition: service_completed_successfully
     networks:
       - healthcare-network
     restart: unless-stopped
@@ -64,25 +47,18 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
-      target: runner
+      dockerfile: Dockerfile.setup
     container_name: healthcare-frontend
     environment:
       DATABASE_URL: postgresql://user:password@postgres:5432/healthcare_db
-      NEXTAUTH_URL: http://localhost:3000
-      NEXTAUTH_SECRET: your-secret-key-change-this-in-production
       BETTER_AUTH_URL: http://localhost:3000
       BETTER_AUTH_SECRET: your-better-auth-secret-change-this-in-production
-      # Add other environment variables as needed
-      # GOOGLE_GENAI_API_KEY: ${GOOGLE_GENAI_API_KEY}
-      # OPENAI_API_KEY: ${OPENAI_API_KEY}
+      AGENT_BACKEND_URL: http://localhost:8000/agui
     ports:
       - "3000:3000"
     depends_on:
       postgres:
         condition: service_healthy
-      db-seed:
-        condition: service_completed_successfully
     networks:
       - healthcare-network
     restart: unless-stopped
