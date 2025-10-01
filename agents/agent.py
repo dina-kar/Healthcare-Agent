@@ -18,7 +18,10 @@ from starlette.requests import Request
 # Load environment variables from a .env file
 load_dotenv()
 
-port = int(os.environ.get("PORT", 8000))
+port = int(os.environ.get("PORT", 8000)) # default to 8000
+env = os.getenv("ENV", "dev")        # default to dev
+
+host = "0.0.0.0" if env == "prod" else "localhost"
 
 # Database connection
 db_url = os.getenv("DATABASE_URL", "postgresql+psycopg://user:password@localhost:5432/healthcare_db")
@@ -591,4 +594,4 @@ if __name__ == "__main__":
     print("✅ Mood tracking, glucose monitoring, meal logging")
     print("✅ Health insights and meal planning")
     print("=" * 50)
-    agent_os.serve(app="agent:app", reload=True, port=port)
+    agent_os.serve(app="agent:app", reload=(env == "dev"), host=host, port=port)
